@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Uncle Tim's Barbershop | Website Proposal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',system-ui,sans-serif;background:#faf6f0;color:#1f1c19;line-height:1.65;-webkit-font-smoothing:antialiased;min-height:100vh}
+
+:root{
+  --red:#e2564d;
+  --red-dark:#c2433b;
+  --ink:#1f1c19;
+  --soft:#6f6960;
+  --bg:#faf6f0;
+  --warm:#f4ece2;
+  --line:#ece6dd;
+  --surface:#fff;
+  --display:'Oswald','Arial Narrow',sans-serif;
+}
+
+/* Progress bar */
+.progress-bar{position:fixed;top:0;left:0;right:0;z-index:100;background:#fff;border-bottom:1px solid var(--line);padding:0 24px}
+.progress-inner{max-width:680px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:60px;gap:8px}
+.step-pip{display:flex;align-items:center;gap:8px;font-size:.82rem;font-weight:600;color:#c5bdb4;transition:.3s}
+.step-pip.active{color:var(--red)}
+.step-pip.done{color:var(--ink)}
+.pip{width:28px;height:28px;border-radius:50%;border:2px solid currentColor;display:grid;place-items:center;font-size:.78rem;font-weight:700;flex-shrink:0;transition:.3s}
+.step-pip.active .pip{background:var(--red);border-color:var(--red);color:#fff}
+.step-pip.done .pip{background:var(--ink);border-color:var(--ink);color:#fff}
+.pip-line{flex:1;height:2px;background:var(--line);border-radius:2px;transition:.3s}
+.pip-line.done{background:var(--ink)}
+.step-label{display:none}
+@media(min-width:480px){.step-label{display:inline}}
+
+/* Stripe */
+.stripe-top{height:5px;background:repeating-linear-gradient(45deg,var(--red) 0 14px,#fff 14px 28px);margin-top:60px}
+
+/* Sections */
+.section{display:none;max-width:680px;margin:0 auto;padding:48px 24px 80px}
+.section.active{display:block}
+
+/* Typography */
+.eyebrow{font-size:.75rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--red);margin-bottom:.6rem}
+h1{font-family:var(--display);font-size:clamp(2rem,5vw,3rem);font-weight:700;text-transform:uppercase;line-height:1.05;margin-bottom:.8rem}
+h2{font-family:var(--display);font-size:1.4rem;font-weight:600;text-transform:uppercase;letter-spacing:.02em;margin:2rem 0 .8rem;color:var(--ink)}
+h3{font-size:1rem;font-weight:600;margin-bottom:.4rem}
+p{color:var(--soft);margin-bottom:1rem;font-size:.97rem}
+p.dark{color:var(--ink)}
+
+/* Included list */
+.included{list-style:none;margin-bottom:1.4rem}
+.included li{display:flex;gap:.8rem;align-items:flex-start;padding:.5rem 0;border-bottom:1px solid var(--line);font-size:.95rem;color:var(--ink)}
+.included li:last-child{border-bottom:none}
+.included .tick{color:var(--red);font-size:1.1rem;flex-shrink:0;margin-top:1px}
+
+/* Price table */
+.price-table{background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow:hidden;margin-bottom:.8rem}
+.price-row{display:flex;justify-content:space-between;align-items:center;padding:1rem 1.2rem;border-bottom:1px solid var(--line);gap:1rem}
+.price-row:last-child{border-bottom:none}
+.price-row.header{background:var(--ink);color:#fff;font-weight:600;font-size:.85rem;letter-spacing:.04em;text-transform:uppercase}
+.price-row .desc{font-size:.9rem;color:var(--soft);margin-top:.2rem}
+.price-row .amount{font-family:var(--display);font-size:1.3rem;font-weight:600;color:var(--red);white-space:nowrap}
+.price-row.header .amount{color:#fff;font-size:.85rem}
+.price-note{font-size:.84rem;color:var(--soft);font-style:italic;margin-bottom:1.4rem}
+
+/* Option cards */
+.options{display:grid;gap:1rem;margin:1.2rem 0 1.6rem}
+.option-card{border:2px solid var(--line);border-radius:10px;padding:1.4rem;cursor:pointer;transition:.2s;background:var(--surface);position:relative}
+.option-card:hover{border-color:#c5bdb4}
+.option-card.selected{border-color:var(--red);background:#fff8f7}
+.option-card input[type=radio]{position:absolute;opacity:0;pointer-events:none}
+.option-badge{display:inline-block;font-family:var(--display);font-size:.8rem;font-weight:600;text-transform:uppercase;letter-spacing:.04em;padding:.25rem .7rem;border-radius:4px;margin-bottom:.6rem}
+.option-badge.a{background:var(--warm);color:var(--ink)}
+.option-badge.b{background:var(--red);color:#fff}
+.option-price{font-family:var(--display);font-size:1.5rem;font-weight:700;color:var(--red);margin:.4rem 0 .3rem}
+.option-price span{font-size:.9rem;font-weight:500;color:var(--soft)}
+.option-card ul{list-style:none;margin-top:.8rem}
+.option-card ul li{font-size:.88rem;color:var(--soft);padding:.25rem 0;display:flex;gap:.5rem}
+.option-card ul li::before{content:'•';color:var(--red);flex-shrink:0}
+.check-indicator{position:absolute;top:1rem;right:1rem;width:24px;height:24px;border-radius:50%;border:2px solid var(--line);transition:.2s;display:grid;place-items:center}
+.option-card.selected .check-indicator{background:var(--red);border-color:var(--red);color:#fff}
+.check-indicator::after{content:'✓';font-size:.7rem;font-weight:700;color:transparent}
+.option-card.selected .check-indicator::after{color:#fff}
+
+/* Agreement */
+.agreement-box{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:1.6rem;margin-bottom:1.4rem;max-height:320px;overflow-y:auto;font-size:.88rem;color:var(--soft);line-height:1.7}
+.agreement-box h3{font-size:.92rem;font-weight:600;color:var(--ink);margin:1.2rem 0 .4rem}
+.agreement-box h3:first-child{margin-top:0}
+.agreement-box ul{padding-left:1.2rem;margin:.4rem 0 .8rem}
+.agreement-box li{margin-bottom:.3rem}
+.scroll-hint{text-align:center;font-size:.8rem;color:#c5bdb4;margin-bottom:1rem}
+
+/* Form fields */
+.field{margin-bottom:1.2rem}
+.field label{display:block;font-weight:600;font-size:.88rem;margin-bottom:.4rem;color:var(--ink)}
+.field label .req{color:var(--red)}
+.field input,.field select{width:100%;padding:.8rem 1rem;border:1.5px solid var(--line);border-radius:8px;font-family:inherit;font-size:.95rem;color:var(--ink);background:#fff;transition:.2s}
+.field input:focus,.field select:focus{outline:none;border-color:var(--red)}
+.field input.error,.field select.error{border-color:var(--red)}
+.err-msg{font-size:.8rem;color:var(--red);margin-top:.3rem;display:none}
+
+/* Signature pad */
+.sig-wrap{border:1.5px solid var(--line);border-radius:8px;background:#fff;overflow:hidden;margin-bottom:.6rem;position:relative}
+canvas#sig{width:100%;height:160px;display:block;cursor:crosshair;touch-action:none}
+.sig-hint{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:.88rem;color:#c5bdb4;pointer-events:none;transition:.2s}
+.sig-hint.hidden{opacity:0}
+.sig-clear{font-size:.8rem;color:var(--soft);background:none;border:none;cursor:pointer;text-decoration:underline;padding:0;margin-bottom:1.2rem}
+
+/* Checkbox */
+.check-row{display:flex;gap:.8rem;align-items:flex-start;margin-bottom:1.4rem}
+.check-row input[type=checkbox]{width:20px;height:20px;flex-shrink:0;margin-top:2px;accent-color:var(--red);cursor:pointer}
+.check-row label{font-size:.9rem;color:var(--ink);cursor:pointer}
+
+/* Buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;font-family:var(--display);font-weight:600;font-size:1rem;letter-spacing:.03em;text-transform:uppercase;padding:.9rem 2rem;border-radius:6px;border:none;cursor:pointer;transition:.2s;width:100%}
+.btn-primary{background:var(--red);color:#fff}
+.btn-primary:hover{background:var(--red-dark)}
+.btn-primary:disabled{background:#ccc;cursor:not-allowed}
+.btn-ghost{background:transparent;color:var(--soft);border:1.5px solid var(--line);margin-bottom:.8rem}
+.btn-ghost:hover{border-color:var(--soft)}
+
+/* Divider */
+.divider{border:none;border-top:1px solid var(--line);margin:2rem 0}
+
+/* Summary card */
+.summary{background:var(--warm);border-radius:10px;padding:1.4rem;margin-bottom:1.6rem}
+.summary-row{display:flex;justify-content:space-between;font-size:.92rem;padding:.4rem 0;border-bottom:1px solid var(--line)}
+.summary-row:last-child{border-bottom:none;font-weight:600;font-size:1rem;padding-top:.8rem}
+.summary-row .label{color:var(--soft)}
+.summary-row .val{color:var(--ink);font-weight:500}
+.summary-row:last-child .val{color:var(--red)}
+
+/* Success screen */
+.success-icon{width:72px;height:72px;border-radius:50%;background:var(--red);color:#fff;font-size:2rem;display:grid;place-items:center;margin:0 auto 1.6rem}
+.success-wrap{text-align:center;padding-top:2rem}
+.success-wrap h1{font-size:2rem;margin-bottom:.8rem}
+.success-wrap p{max-width:42ch;margin:0 auto 1rem}
+.next-steps{text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:1.4rem;margin-top:2rem}
+.next-steps h3{font-size:1rem;font-weight:600;margin-bottom:.8rem}
+.next-steps ol{padding-left:1.2rem}
+.next-steps li{padding:.3rem 0;font-size:.92rem;color:var(--soft)}
+
+@media(max-width:480px){
+  .progress-inner{gap:4px}
+  .section{padding:36px 20px 60px}
+}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<!-- PROGRESS BAR -->
+<div class="progress-bar">
+  <div class="progress-inner">
+    <div class="step-pip active" id="pip1">
+      <div class="pip">1</div>
+      <span class="step-label">Proposal</span>
+    </div>
+    <div class="pip-line" id="line1"></div>
+    <div class="step-pip" id="pip2">
+      <div class="pip">2</div>
+      <span class="step-label">Your option</span>
+    </div>
+    <div class="pip-line" id="line2"></div>
+    <div class="step-pip" id="pip3">
+      <div class="pip">3</div>
+      <span class="step-label">Agreement</span>
+    </div>
+    <div class="pip-line" id="line3"></div>
+    <div class="step-pip" id="pip4">
+      <div class="pip">4</div>
+      <span class="step-label">Done</span>
+    </div>
+  </div>
+</div>
+
+<div class="stripe-top"></div>
+
+<!-- STEP 1: PROPOSAL -->
+<div class="section active" id="step1">
+  <div class="eyebrow">Website proposal</div>
+  <h1>Uncle Tim's Barbershop</h1>
+  <p>I put together a working concept of a new website for the shop, built around your real branding, team, and 4.9-star reputation. Have a look, and if you're happy, we can get you set up in minutes below.</p>
+
+  <a href="uncle-tims-barbershop.html" target="_blank" style="display:block;background:var(--warm);border:1px solid var(--line);border-radius:10px;padding:1.2rem 1.4rem;margin-bottom:1.6rem;text-decoration:none;color:inherit">
+    <div style="font-weight:600;font-size:.95rem;margin-bottom:.2rem">View your demo site</div>
+    <div style="font-size:.85rem;color:var(--soft)">Opens in a new tab</div>
+  </a>
+
+  <h2>What's included</h2>
+  <ul class="included">
+    <li><span class="tick">✓</span>Custom site built around your logo, brand colours, and 6-barber team</li>
+    <li><span class="tick">✓</span>Mobile-friendly and fast-loading (most visitors will be on their phone)</li>
+    <li><span class="tick">✓</span>Pages: home, services, team, products, gallery, reviews, find us</li>
+    <li><span class="tick">✓</span>Embedded Google Map, live hours, and click-to-call phone number</li>
+    <li><span class="tick">✓</span>Your 4.9-star Google rating featured prominently</li>
+    <li><span class="tick">✓</span>Links to your Facebook and Instagram</li>
+    <li><span class="tick">✓</span>Secure hosting with free SSL</li>
+    <li><span class="tick">✓</span>One round of revisions before launch</li>
+  </ul>
+
+  <h2>Setup fee</h2>
+  <div class="price-table">
+    <div class="price-row header"><span>Item</span><span class="amount">Price</span></div>
+    <div class="price-row">
+      <div><div style="font-weight:600">Website setup</div><div class="desc">Design, build, and launch. One-time cost, yours to keep.</div></div>
+      <div class="amount">$800</div>
+    </div>
+  </div>
+  <p class="price-note">Local rate (standard is $1,000). Setup fee is due before final launch.</p>
+
+  <button class="btn btn-primary" onclick="go(2)">Looks good, let's do this</button>
+</div>
+
+<!-- STEP 2: OPTION CHOICE -->
+<div class="section" id="step2">
+  <div class="eyebrow">Step 2 of 4</div>
+  <h1>Choose your option</h1>
+  <p>The website is a one-time purchase either way. The care plan is optional.</p>
+
+  <div class="options">
+    <label class="option-card" id="card-a" onclick="selectOption('a')">
+      <input type="radio" name="option" value="a">
+      <div class="check-indicator"></div>
+      <span class="option-badge a">Option A</span>
+      <div class="option-price">$800 <span>one time</span></div>
+      <h3>Website only</h3>
+      <ul>
+        <li>Everything in the proposal, live and yours</li>
+        <li>Hosting login and care guide handed over at launch</li>
+        <li>You manage hosting and future edits yourself (or hire who you like)</li>
+      </ul>
+    </label>
+
+    <label class="option-card" id="card-b" onclick="selectOption('b')">
+      <input type="radio" name="option" value="b">
+      <div class="check-indicator"></div>
+      <span class="option-badge b">Option B</span>
+      <div class="option-price">$800 <span>+ $75/mo</span></div>
+      <h3>Website + care plan</h3>
+      <ul>
+        <li>Everything in Option A</li>
+        <li>Hosting, security and uptime managed for you</li>
+        <li>Up to 30 min of content edits per month (prices, hours, photos)</li>
+        <li>Cancel any time with 30 days' notice</li>
+      </ul>
+    </label>
+  </div>
+
+  <button class="btn btn-primary" id="btn-next2" onclick="go(3)" disabled>Continue</button>
+  <br><br>
+  <button class="btn btn-ghost" onclick="go(1)">Back</button>
+</div>
+
+<!-- STEP 3: AGREEMENT + SIGNATURE -->
+<div class="section" id="step3">
+  <div class="eyebrow">Step 3 of 4</div>
+  <h1>Review and sign</h1>
+
+  <div id="summary-box" class="summary"></div>
+
+  <p class="dark" style="margin-bottom:.6rem;font-weight:600;font-size:.92rem">Scope and terms</p>
+  <p class="scroll-hint">Scroll to read in full</p>
+  <div class="agreement-box" id="agreement-scroll">
+    <h3>1. What's included in setup</h3>
+    <p>For the agreed setup fee, we will design, build, and launch one website including all pages and features outlined in the proposal. This includes one round of revisions before launch.</p>
+
+    <h3>2. Monthly care plan (Option B only)</h3>
+    <p>The care plan is optional and not required to purchase the website. If you choose Option B, $75/month covers: hosting and SSL, routine software and security updates, uptime monitoring, and up to 30 minutes of minor content edits per month (e.g. updating text, prices, hours, swapping a photo). Unused time does not roll over.</p>
+
+    <h3>3. What's not included (billed separately)</h3>
+    <p>The following are outside the care plan and quoted and billed separately: new pages or sections, design changes or redesigns, new features (booking systems, online stores, etc.), content edits beyond 30 minutes per month, and copywriting or photography services. We'll always quote extra work before starting it, nothing is billed without your approval.</p>
+
+    <h3>4. Handover (Option A)</h3>
+    <p>If you choose Option A, at launch we'll provide hosting and domain access details (or transfer the site to a hosting account in your name), and brief written instructions for basic upkeep. From handover, you're responsible for hosting, security, uptime, and future changes. You're welcome to take up the care plan later, or request one-off paid work at our standard hourly rate, subject to availability.</p>
+
+    <h3>5. Turnaround and edit requests (Option B)</h3>
+    <p>Routine edit requests are completed within 2 to 3 business days. Requests are batched and processed on set days each week. Urgent requests (broken links, factual errors) are prioritised where possible. Send requests by email with a clear description so there's a written record for both of us.</p>
+
+    <h3>6. Payment terms</h3>
+    <ul>
+      <li>Setup fee: due before work begins on final launch</li>
+      <li>Monthly care plan (if chosen): billed monthly in advance, due within 7 days of invoice</li>
+      <li>Late payments may result in the site being taken offline until payment is received, with prior notice</li>
+    </ul>
+
+    <h3>7. Cancellation (Option B)</h3>
+    <p>Either party may cancel the care plan with 30 days' written notice. Upon cancellation, Section 4 (Handover) applies.</p>
+
+    <h3>8. Ownership</h3>
+    <p>Once the setup fee is paid in full, the website design and content created for you are yours. The underlying code template and reusable components remain our intellectual property.</p>
+
+    <h3>9. Your responsibilities</h3>
+    <p>You agree to provide accurate, lawful content (text, images, logos, reviews) that you have the right to use, and to respond to requests for content or approval in a timely manner.</p>
+  </div>
+
+  <div class="field">
+    <label>Your full name <span class="req">*</span></label>
+    <input type="text" id="field-name" placeholder="Tim Smith" autocomplete="name">
+    <div class="err-msg" id="err-name">Please enter your full name</div>
+  </div>
+
+  <div class="field">
+    <label>Email address <span class="req">*</span></label>
+    <input type="email" id="field-email" placeholder="tim@uncletimsbarbershop.com" autocomplete="email">
+    <div class="err-msg" id="err-email">Please enter a valid email address</div>
+  </div>
+
+  <div class="field">
+    <label>Draw your signature <span class="req">*</span></label>
+    <div class="sig-wrap">
+      <canvas id="sig"></canvas>
+      <div class="sig-hint" id="sig-hint">Sign here</div>
+    </div>
+    <button class="sig-clear" onclick="clearSig()">Clear signature</button>
+    <div class="err-msg" id="err-sig">Please sign above</div>
+  </div>
+
+  <div class="check-row">
+    <input type="checkbox" id="agree-check">
+    <label for="agree-check">I have read and agree to the scope and terms above, and confirm my chosen option and pricing.</label>
+  </div>
+  <div class="err-msg" id="err-agree" style="margin-top:-.8rem;margin-bottom:1rem">Please check the box to confirm</div>
+
+  <button class="btn btn-primary" onclick="submit()">Sign and confirm</button>
+  <br><br>
+  <button class="btn btn-ghost" onclick="go(2)">Back</button>
+</div>
+
+<!-- STEP 4: DONE -->
+<div class="section" id="step4">
+  <div class="success-wrap">
+    <div class="success-icon">✓</div>
+    <h1>You're all set, Tim.</h1>
+    <p>Thanks for signing on. A copy of everything below has been noted. We'll be in touch shortly with next steps.</p>
+
+    <div id="final-summary" class="summary" style="text-align:left;margin-top:1.6rem"></div>
+
+    <div class="next-steps">
+      <h3>What happens next</h3>
+      <ol id="next-steps-list"></ol>
+    </div>
+  </div>
+</div>
+
+<script>
+let chosenOption = null;
+let sigHasMark = false;
+let sigCanvas, sigCtx, sigDrawing = false, sigLastX, sigLastY;
+
+// ---- Navigation ----
+function go(step) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.getElementById('step' + step).classList.add('active');
+  window.scrollTo(0, 0);
+  updateProgress(step);
+  if (step === 3) buildSummary();
+}
+
+function updateProgress(step) {
+  for (let i = 1; i <= 4; i++) {
+    const pip = document.getElementById('pip' + i);
+    pip.classList.remove('active', 'done');
+    if (i < step) pip.classList.add('done');
+    else if (i === step) pip.classList.add('active');
+  }
+  for (let i = 1; i <= 3; i++) {
+    const line = document.getElementById('line' + i);
+    line.classList.toggle('done', i < step);
+  }
+}
+
+// ---- Option selection ----
+function selectOption(opt) {
+  chosenOption = opt;
+  document.getElementById('card-a').classList.toggle('selected', opt === 'a');
+  document.getElementById('card-b').classList.toggle('selected', opt === 'b');
+  document.getElementById('btn-next2').disabled = false;
+}
+
+// ---- Summary builder ----
+function buildSummary() {
+  const isB = chosenOption === 'b';
+  const html = `
+    <div class="summary-row"><span class="label">Option chosen</span><span class="val">${isB ? 'B: Website + care plan' : 'A: Website only'}</span></div>
+    <div class="summary-row"><span class="label">Setup fee</span><span class="val">$800 (one time)</span></div>
+    ${isB ? '<div class="summary-row"><span class="label">Monthly care plan</span><span class="val">$75/mo from launch</span></div>' : ''}
+    <div class="summary-row"><span class="label">Total today</span><span class="val">$800</span></div>
+  `;
+  document.getElementById('summary-box').innerHTML = html;
+}
+
+// ---- Signature canvas ----
+window.addEventListener('DOMContentLoaded', () => {
+  sigCanvas = document.getElementById('sig');
+  sigCtx = sigCanvas.getContext('2d');
+
+  function resize() {
+    const rect = sigCanvas.parentElement.getBoundingClientRect();
+    sigCanvas.width = rect.width;
+    sigCanvas.height = 160;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  function pos(e) {
+    const r = sigCanvas.getBoundingClientRect();
+    if (e.touches) return { x: e.touches[0].clientX - r.left, y: e.touches[0].clientY - r.top };
+    return { x: e.clientX - r.left, y: e.clientY - r.top };
+  }
+
+  function startDraw(e) {
+    e.preventDefault();
+    sigDrawing = true;
+    const p = pos(e);
+    sigLastX = p.x; sigLastY = p.y;
+    document.getElementById('sig-hint').classList.add('hidden');
+  }
+
+  function draw(e) {
+    if (!sigDrawing) return;
+    e.preventDefault();
+    const p = pos(e);
+    sigCtx.beginPath();
+    sigCtx.moveTo(sigLastX, sigLastY);
+    sigCtx.lineTo(p.x, p.y);
+    sigCtx.strokeStyle = '#1f1c19';
+    sigCtx.lineWidth = 2.2;
+    sigCtx.lineCap = 'round';
+    sigCtx.lineJoin = 'round';
+    sigCtx.stroke();
+    sigLastX = p.x; sigLastY = p.y;
+    sigHasMark = true;
+  }
+
+  function endDraw() { sigDrawing = false; }
+
+  sigCanvas.addEventListener('mousedown', startDraw);
+  sigCanvas.addEventListener('mousemove', draw);
+  sigCanvas.addEventListener('mouseup', endDraw);
+  sigCanvas.addEventListener('mouseleave', endDraw);
+  sigCanvas.addEventListener('touchstart', startDraw, { passive: false });
+  sigCanvas.addEventListener('touchmove', draw, { passive: false });
+  sigCanvas.addEventListener('touchend', endDraw);
+});
+
+function clearSig() {
+  sigCtx.clearRect(0, 0, sigCanvas.width, sigCanvas.height);
+  sigHasMark = false;
+  document.getElementById('sig-hint').classList.remove('hidden');
+}
+
+// ---- Validation + submit ----
+function showErr(id, msg) {
+  const el = document.getElementById(id);
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+function clearErr(id) { document.getElementById(id).style.display = 'none'; }
+
+function submit() {
+  let valid = true;
+  const name = document.getElementById('field-name').value.trim();
+  const email = document.getElementById('field-email').value.trim();
+  const agreed = document.getElementById('agree-check').checked;
+
+  clearErr('err-name'); clearErr('err-email'); clearErr('err-sig'); clearErr('err-agree');
+  document.getElementById('field-name').classList.remove('error');
+  document.getElementById('field-email').classList.remove('error');
+
+  if (!name) { showErr('err-name','Please enter your full name'); document.getElementById('field-name').classList.add('error'); valid = false; }
+  if (!email || !email.includes('@')) { showErr('err-email','Please enter a valid email address'); document.getElementById('field-email').classList.add('error'); valid = false; }
+  if (!sigHasMark) { showErr('err-sig','Please sign above'); valid = false; }
+  if (!agreed) { showErr('err-agree','Please check the box to confirm'); valid = false; }
+
+  if (!valid) return;
+
+  // Build final summary
+  const isB = chosenOption === 'b';
+  const date = new Date().toLocaleDateString('en-AU', { day:'numeric', month:'long', year:'numeric' });
+  document.getElementById('final-summary').innerHTML = `
+    <div class="summary-row"><span class="label">Name</span><span class="val">${name}</span></div>
+    <div class="summary-row"><span class="label">Email</span><span class="val">${email}</span></div>
+    <div class="summary-row"><span class="label">Option</span><span class="val">${isB ? 'B: Website + care plan' : 'A: Website only'}</span></div>
+    <div class="summary-row"><span class="label">Setup fee</span><span class="val">$800</span></div>
+    ${isB ? '<div class="summary-row"><span class="label">Monthly</span><span class="val">$75/mo from launch</span></div>' : ''}
+    <div class="summary-row"><span class="label">Signed</span><span class="val">${date}</span></div>
+  `;
+
+  // Next steps
+  const steps = isB
+    ? ['Confirm your service list and prices so we can fill in the last details','We finalize the site and send you a preview for approval','Pay the $800 setup fee to lock in your launch date','Site goes live, $75/mo care plan kicks in from launch']
+    : ['Confirm your service list and prices so we can fill in the last details','We finalize the site and send you a preview for approval','Pay the $800 setup fee to lock in your launch date','Site goes live, hosting login and handover guide sent to you'];
+
+  document.getElementById('next-steps-list').innerHTML = steps.map(s => `<li>${s}</li>`).join('');
+
+  go(4);
+}
+</script>
+</body>
+</html>
